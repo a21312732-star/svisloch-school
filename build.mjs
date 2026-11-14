@@ -242,7 +242,7 @@ pages["index.html"] = ["Свислочская средняя школа им. �
 <section class="section">
   <div class="wrap split narrow-img">
     <figure>
-      <img src="${IMG.chervyakov}" alt="Александр Григорьевич Червяков, портрет" loading="lazy" width="600" height="800">
+      <img src="${IMG.chervyakov}" alt="Александр Григорьевич Червяков, портрет" loading="lazy" width="800" height="1110">
     </figure>
     <div>
       <span class="eyebrow" style="color:var(--green)">Имя школы</span>
@@ -388,7 +388,7 @@ ${head("Александр Григорьевич Червяков", "Учите
 <section class="section">
   <div class="wrap split narrow-img">
     <figure>
-      <img src="${IMG.chervyakov}" alt="Александр Григорьевич Червяков, портрет" width="600" height="800">
+      <img src="${IMG.chervyakov}" alt="Александр Григорьевич Червяков, портрет" width="800" height="1110">
       <figcaption>А. Г. Червяков (1892–1937)</figcaption>
     </figure>
     <div>
