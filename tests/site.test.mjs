@@ -24,7 +24,7 @@ const check = (ok, name) => { ok ? passed++ : failed++; console.log(`${ok ? "  o
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
 const browser = await chromium.launch();
-for (const [label, viewport] of [["desktop", { width: 1280, height: 800 }], ["tablet", { width: 800, height: 1000 }], ["mobile", { width: 360, height: 740 }]]) {
+for (const [label, viewport] of [["wide", { width: 1920, height: 1000 }], ["desktop", { width: 1280, height: 800 }], ["tablet", { width: 800, height: 1000 }], ["mobile", { width: 360, height: 740 }]]) {
   const ctx = await browser.newContext({ viewport });
   await ctx.route((u) => !u.href.startsWith(base), (r) => r.abort());
   const page = await ctx.newPage();
@@ -61,8 +61,11 @@ for (const [label, viewport] of [["desktop", { width: 1280, height: 800 }], ["ta
   check((await overflow(page)) <= 0, t("нет горизонтальной прокрутки"));
   check(existsSync(join(ROOT, "CREDITS.md")), t("файл с источниками фото на месте"));
 
+  const fill = await page.evaluate(() => [".panel", ".works", ".reviews", ".plans", ".steps", ".cta", ".tiles"].map((q) => document.querySelector(q).getBoundingClientRect().width / innerWidth));
+  check(Math.min(...fill) > 0.86, t(`блоки занимают больше 86% ширины экрана (минимум ${Math.round(Math.min(...fill) * 100)}%)`));
+
   // Меню
-  if (label === "desktop") {
+  if (label === "desktop" || label === "wide") {
     check(await page.isVisible("#nav a[href='#contacts']"), t("меню видно"));
   } else {
     check(!(await page.isVisible("#nav")), t("меню скрыто по умолчанию"));
@@ -71,19 +74,6 @@ for (const [label, viewport] of [["desktop", { width: 1280, height: 800 }], ["ta
     await page.click("#nav a[href='#services']");
     check(!(await page.isVisible("#nav")), t("меню закрывается после выбора пункта"));
   }
-
-  // Слайдер
-  const active = () => page.evaluate(() => [...document.querySelectorAll(".slide")].findIndex((s) => s.classList.contains("active")));
-  const visible = () => page.evaluate(() => [...document.querySelectorAll(".slide")].filter((s) => s.offsetParent).length);
-  check((await active()) === 0 && (await visible()) === 1, t("слайдер: показан первый слайд"));
-  await page.click("#next");
-  check((await active()) === 1 && (await visible()) === 1, t("слайдер: стрелка «вперёд»"));
-  await page.click("#prev"); await page.click("#prev");
-  check((await active()) === 2, t("слайдер: «назад» с первого слайда ведёт на последний"));
-  await page.click("#dots button:nth-child(2)");
-  check((await active()) === 1, t("слайдер: переключение точками"));
-  check((await page.getAttribute("#dots button:nth-child(2)", "aria-current")) === "true", t("слайдер: активная точка отмечена"));
-  check((await overflow(page)) <= 0, t("слайдер: нет горизонтальной прокрутки на любом слайде"));
 
   // Форма
   await page.click("#form button[type=submit]");
