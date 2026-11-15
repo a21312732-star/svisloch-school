@@ -24,7 +24,7 @@ const check = (ok, name) => { ok ? passed++ : failed++; console.log(`${ok ? "  o
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
 const browser = await chromium.launch();
-for (const [label, viewport] of [["wide", { width: 1920, height: 1000 }], ["desktop", { width: 1280, height: 800 }], ["tablet", { width: 800, height: 1000 }], ["mobile", { width: 360, height: 740 }]]) {
+for (const [label, viewport] of [["ultrawide", { width: 2560, height: 1200 }], ["wide", { width: 1920, height: 1000 }], ["desktop", { width: 1280, height: 800 }], ["tablet", { width: 800, height: 1000 }], ["mobile", { width: 360, height: 740 }]]) {
   const ctx = await browser.newContext({ viewport });
   await ctx.route((u) => !u.href.startsWith(base), (r) => r.abort());
   const page = await ctx.newPage();
@@ -62,10 +62,11 @@ for (const [label, viewport] of [["wide", { width: 1920, height: 1000 }], ["desk
   check(existsSync(join(ROOT, "CREDITS.md")), t("файл с источниками фото на месте"));
 
   const fill = await page.evaluate(() => [".panel", ".works", ".reviews", ".plans", ".steps", ".cta", ".tiles"].map((q) => document.querySelector(q).getBoundingClientRect().width / innerWidth));
-  check(Math.min(...fill) > 0.86, t(`блоки занимают больше 86% ширины экрана (минимум ${Math.round(Math.min(...fill) * 100)}%)`));
+  const need = viewport.width >= 1280 ? 0.93 : 0.88;
+  check(Math.min(...fill) > need, t(`блоки занимают больше ${need * 100}% ширины экрана (минимум ${Math.round(Math.min(...fill) * 100)}%)`));
 
   // Меню
-  if (label === "desktop" || label === "wide") {
+  if (viewport.width >= 1280) {
     check(await page.isVisible("#nav a[href='#contacts']"), t("меню видно"));
   } else {
     check(!(await page.isVisible("#nav")), t("меню скрыто по умолчанию"));
